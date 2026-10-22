@@ -74,3 +74,7 @@ To update, stop the service and run the installer from a newly extracted publish
 ## Status check
 
 Double-click `Check-Automatic-System.bat` in `Automatic-Service`. It requests administrator access for complete process information, shows the service/startup state, installed files, engine process counts, both owned firewall rules and recent service events, then waits for Enter. A Running service means the watcher is alive; it is not by itself proof of successful Discord traffic routing.
+
+## Verified service repair
+
+On 2026-10-22, manual mode worked while the installed service detected Discord and logged activation but Discord updates timed out opening TCP. The service install omitted the two inbound rules that upstream ProxiFyre creates for its engine. Adding the rules for the protected installed EXE resolved the issue: the user confirmed Discord updates and opening work in automatic mode. Re-run the updated install BAT to repair older installs; it also updates the remover so both owned rules are cleaned up. Voice/video remain separate validation targets.

@@ -69,7 +69,7 @@ A small Windows tray app for Discord access restrictions in Turkey. Click **Star
 
 | Provider | Verification status |
 | --- | --- |
-| Türk Telekom | HTTPS, poisoned-DNS correction, UDP forwarding, process isolation and cleanup tested on one connection |
+| Türk Telekom | HTTPS, poisoned-DNS correction, UDP forwarding, process isolation and cleanup tested on one connection; manual and installed-service Discord updates/opening verified |
 | TurkNet, Superonline, Vodafone and others | Not verified; the included strategies may or may not work |
 
 The app does not select a configuration by provider name. It tests the included strategies on your current connection. A successful Start checks public HTTPS endpoints; real voice/video/screen-sharing sessions still need separate testing.
