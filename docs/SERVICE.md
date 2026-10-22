@@ -11,7 +11,9 @@ Both reuse the same engines and published runtime DLLs. The service does not loa
 
 An actual Windows service needs one administrator installation step. It cannot safely run as LocalSystem from a user-writable portable folder. The installer copies the published folder to `%ProgramFiles%\UnblockDiscord`, protects it so only Administrators/SYSTEM can modify it, records the intended user's Discord folder, and registers automatic startup plus crash recovery. It leaves the portable copy usable separately.
 
-Close manual Unblock Discord and other bypass tools. From **64-bit Windows PowerShell 5.1, Run as Administrator**, inside the published folder:
+Close manual Unblock Discord and other bypass tools. The easiest installation is to double-click **Install-Automatic-Service.bat** in the extracted published folder and accept the administrator prompt. It runs the installer, which starts the service through Windows, then shows a status report that closes after 10 seconds or any key (including Esc). Keep the complete folder together; the BAT uses the scripts in `tools`. It preserves your original Discord folder if UAC asks for a different administrator account.
+
+For a command-line installation, from **64-bit Windows PowerShell 5.1, Run as Administrator**, inside the published folder:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Install-Service.ps1
