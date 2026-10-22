@@ -84,9 +84,9 @@ This is experimental. NXDOMAIN responses, hidden TLS hostnames (ECH), direct IP 
 
 ## Automatic Windows service / Otomatik Windows hizmeti
 
-Publishing also includes `UnblockDiscord.Service.exe`. It can start at boot, wait for Discord process events, activate the bypass while Discord is open, and stop the engines after a 10-second update handover window. It uses the same runtime and engines as the manual app.
+Publishing creates separate `Manual` and `Automatic-Service` folders. The automatic folder contains `UnblockDiscord.Service.exe` plus install, remove and check BATs. It can start at boot, wait for Discord process events, activate the bypass while Discord is open, and stop the engines after a 10-second update handover window. Each mode carries its own runtime and engines so its folder can be copied independently.
 
-Double-click `Install-Automatic-Service.bat` in the extracted publish folder to request administrator approval and install/start the service. Double-click `Remove-Automatic-Service.bat` for full removal of our service, installed configuration/files, and event-log source. Each launcher shows a short report with a 10-second countdown.
+Double-click `Install-Automatic-Service.bat` in the extracted publish folder to request administrator approval and install/start the service. Double-click `Remove-Automatic-Service.bat` for full removal of our service, installed configuration/files, and event-log source. Install/remove reports close after 10 seconds; `Check-Automatic-System.bat` waits until you press Enter. Service installation creates two program-specific firewall rules for its ProxiFyre engine, and removal deletes them.
 
 A real Windows service requires an Administrator install step into a protected Program Files folder. Run `tools\Install-Service.ps1` from the published folder using 64-bit Windows PowerShell 5.1 as Administrator. It targets the installing user's Discord folder; use `-DiscordFolder` if elevating as another account. Do not run the manual app's bypass at the same time.
 
@@ -104,13 +104,13 @@ dotnet build UnblockDiscord.slnx -c Release
 
 Run `bin\Release\net10.0-windows\UnblockDiscord.exe`. The build copies the bundled `engines` folder automatically. Administrator rights and the packet-filter prerequisites are needed to run the bypass.
 
-To create a folder for distribution (requires the Desktop Runtime on the receiving PC):
+To publish both self-contained Windows x64 mode folders (.NET runtime included):
 
 ```powershell
-dotnet publish UnblockDiscord.csproj -c Release --self-contained false -o artifacts/UnblockDiscord-win-x64
+dotnet publish UnblockDiscord.csproj -c Release -p:PublishProfile=FolderProfile
 ```
 
-Zip the **entire** published folder, including `engines`. It is not a standalone single EXE.
+The folder is `bin\portable\UnblockDiscord-win-x64`. Zip that whole folder, including both mode folders and their `engines` directories. Neither mode is a standalone single EXE.
 
 ## Tests
 

@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Share the portable folder publish layout (no credentials).
+!Properties/PublishProfiles/FolderProfile.pubxml

@@ -16,7 +16,7 @@ Keep the `engines` folder beside the executable. The Windows Packet Filter drive
 - UDP associations are relayed directly to ByeDPI, including voice transport. TCP/WebSocket signaling and updater traffic use the same folder rule. No authentication automation, account tokens, client patching, DLL injection, or certificate installation is used.
 - Traffic still leaves through your own internet connection and public IP. There is no remote VPN/proxy server. Cloudflare receives DNS queries for the corrected Discord hostnames.
 
-Adapter DNS, the Windows DNS cache, hosts file, system proxy, firewall rules and Discord files are never edited. Runtime configuration is written only beside our bundled ProxiFyre executable. Stop closes the engines and active relay connections; Discord reconnects using the original connection afterward. A kill-on-close Windows Job Object also terminates engines when the UI process is force-killed. The existing packet-filter driver remains installed in its previous state.
+Adapter DNS, the Windows DNS cache, hosts file, system proxy and Discord files are never edited. Automatic-service installation adds two program-specific TCP/UDP inbound firewall rules for its installed ProxiFyre EXE; removal deletes those exact rules. Manual mode does not create firewall rules itself. Runtime configuration is written only beside our bundled ProxiFyre executable. Stop closes the engines and active relay connections; Discord reconnects using the original connection afterward. A kill-on-close Windows Job Object also terminates engines when the UI process is force-killed. The existing packet-filter driver remains installed in its previous state.
 
 ## Limits
 

@@ -25,10 +25,17 @@
     <InternalsVisibleTo Include="UnblockDiscord.Tests" />
     <EmbeddedResource Include="assets\unblock-discord.ico" LogicalName="UnblockDiscord.AppIcon" />
     <None Update="README.md;docs\TECHNICAL.md" CopyToPublishDirectory="PreserveNewest" />
-    <None Update="Remove-Automatic-Service.bat;tools\Remove-Service-Launcher.ps1;Install-Automatic-Service.bat;tools\Install-Service-Launcher.ps1;docs\SERVICE.md;tools\Install-Service.ps1;tools\Uninstall-Service.ps1" CopyToPublishDirectory="PreserveNewest" />
+    <None Update="docs\SERVICE.md" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="PublishAutomaticService" AfterTargets="Publish">
+    <PropertyGroup>
+      <_ManualPublishDirectory>$([System.IO.Path]::GetFullPath('$(PublishDir)', '$(MSBuildProjectDirectory)'))</_ManualPublishDirectory>
+      <_ModePublishRoot>$([System.IO.Path]::GetFullPath('..', '$(_ManualPublishDirectory)'))</_ModePublishRoot>
+      <_ServicePublishDirectory>$([System.IO.Path]::Combine('$(_ModePublishRoot)', 'Automatic-Service'))</_ServicePublishDirectory>
+    </PropertyGroup>
     <MSBuild Projects="service\UnblockDiscord.Service.csproj" Targets="Restore;Publish" RemoveProperties="PublishProfile;PublishProfileFullPath"
-             Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishSingleFile=false;PublishTrimmed=false;PublishDir=$([System.IO.Path]::GetFullPath('$(PublishDir)', '$(MSBuildProjectDirectory)'));DebugType=none;DebugSymbols=false" />
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishSingleFile=false;PublishTrimmed=false;PublishDir=$(_ServicePublishDirectory)\;DebugType=none;DebugSymbols=false" />
+    <WriteLinesToFile File="$(_ModePublishRoot)\README.txt" Overwrite="true"
+                      Lines="Unblock Discord - Windows x64;Manual mode: run Manual\UnblockDiscord.exe and click Start.;Automatic mode: open Automatic-Service and run Install-Automatic-Service.bat.;Status: Automatic-Service\Check-Automatic-System.bat waits for you to close it.;Removal: Automatic-Service\Remove-Automatic-Service.bat.;Use one mode at a time. Each folder contains its own runtime and engines.;See Automatic-Service\README.md for installation details." />
   </Target>
 </Project>

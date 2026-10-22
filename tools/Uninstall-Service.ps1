@@ -47,7 +47,18 @@ if ($hasFiles) {
     # Older installations had no marker. Their verified SCM path proves ownership.
     if (!$ownsFiles -and !$service) { throw 'Cannot verify that the leftover folder belongs to our installer. No files were removed.' }
 }
-if (!$PSCmdlet.ShouldProcess($destination, 'Stop and unregister UnblockDiscord, remove its event source and installed files')) { return }
+$firewallRules=@()
+foreach ($protocol in @('TCP','UDP')) {
+    $ruleName='UnblockDiscord.Automatic.ProxiFyre.'+$protocol
+    $rule=Get-NetFirewallRule -Name $ruleName -PolicyStore PersistentStore -ErrorAction SilentlyContinue
+    if (!$rule) { continue }
+    $application=$rule | Get-NetFirewallApplicationFilter
+    if ($rule.Group -ne 'Unblock Discord Automatic' -or $application.Program -ne (Join-Path $destination 'engines\proxifyre\ProxiFyre.exe')) {
+        throw "The firewall rule does not belong to our installed engine and was preserved: $ruleName"
+    }
+    $firewallRules += $rule
+}
+if (!$PSCmdlet.ShouldProcess($destination, 'Stop and unregister UnblockDiscord, remove its event source, owned firewall rules and installed files')) { return }
 
 if ($service) {
     $controller = Get-Service -Name $serviceName
@@ -64,6 +75,7 @@ if ($service) {
     & sc.exe delete $serviceName | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not remove service registration.' }
 }
+$firewallRules | Remove-NetFirewallRule
 if ($hasFiles) {
     # Close only our executables inside the verified installed directory.
     foreach ($process in (Get-CimInstance Win32_Process)) {
@@ -93,4 +105,4 @@ if (Get-CimInstance Win32_Service -Filter "Name='UnblockDiscord'") {
 Write-Host 'Removed: UnblockDiscord service, automatic startup/recovery settings, installed configuration, engine files and app files.'
 Write-Host 'Removed: UnblockDiscord Application event-log source. Historical log entries were preserved.'
 Write-Host 'Preserved: Discord, extracted portable downloads, other services, Windows Packet Filter and Visual C++ runtime.'
-Write-Host 'No system DNS, proxy, hosts or firewall changes were made by this app, so those need no reset.'
+Write-Host 'Removed our two engine-specific firewall rules. System DNS, proxy and hosts settings were never changed.'

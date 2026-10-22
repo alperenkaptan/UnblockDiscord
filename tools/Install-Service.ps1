@@ -69,6 +69,23 @@ if ($LASTEXITCODE -ne 0) { throw 'Could not protect ownership of service files.'
 Assert-Protected (Get-Item -LiteralPath $destination)
 Get-ChildItem -LiteralPath $destination -Recurse -Force | ForEach-Object { Assert-Protected $_ }
 if (![Diagnostics.EventLog]::SourceExists($serviceName)) { New-EventLog -LogName Application -Source $serviceName }
+# The packet driver reinjects selected TCP/UDP flows as inbound traffic to the
+# local router. Session-0 services cannot show the normal firewall consent UI.
+$enginePath=Join-Path $destination 'engines\proxifyre\ProxiFyre.exe'
+foreach ($protocol in @('TCP','UDP')) {
+    $ruleName='UnblockDiscord.Automatic.ProxiFyre.'+$protocol
+    $rule=Get-NetFirewallRule -Name $ruleName -PolicyStore PersistentStore -ErrorAction SilentlyContinue
+    if ($rule) {
+        $application=$rule | Get-NetFirewallApplicationFilter
+        if ($rule.Group -ne 'Unblock Discord Automatic' -or $application.Program -ne $enginePath) {
+            throw "A firewall rule with our name belongs to a different program: $ruleName"
+        }
+        $rule | Remove-NetFirewallRule
+    }
+    New-NetFirewallRule -Name $ruleName -DisplayName "Unblock Discord Automatic - ProxiFyre $protocol" `
+        -Group 'Unblock Discord Automatic' -Direction Inbound -Action Allow -Program $enginePath `
+        -Protocol $protocol -Profile Any -EdgeTraversalPolicy Block -Enabled True | Out-Null
+}
 if (!$existing) {
     New-Service -Name $serviceName -DisplayName 'Unblock Discord Automatic' -BinaryPathName $binaryPath `
         -StartupType Automatic -DependsOn @('Winmgmt', 'ndisrd') `

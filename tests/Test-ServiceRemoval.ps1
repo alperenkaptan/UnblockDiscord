@@ -10,7 +10,7 @@ $source = $source.Replace("[Environment]::GetFolderPath('ProgramFiles')", "'" + 
 $source = $source.Replace('[Diagnostics.EventLog]::SourceExists($serviceName)', '$true')
 $source = $source.Replace("[Diagnostics.EventLog]::LogNameFromSourceName(`$serviceName, '.')", "'Application'")
 try {
-    foreach ($case in @('normal','wrong-service','orphan-unmarked','orphan-marked','whatif','junction')) {
+    foreach ($case in @('normal','wrong-service','orphan-unmarked','orphan-marked','whatif','junction','wrong-firewall')) {
         $marker = Join-Path $root '.unblockdiscord-install.json'
         if (Test-Path -LiteralPath $marker) { [IO.File]::Delete($marker) }
         if ($case -eq 'orphan-marked') {
@@ -46,6 +46,24 @@ try {
                 $acl=[Security.AccessControl.DirectorySecurity]::new()
                 $acl.SetSecurityDescriptorSddlForm('O:BAG:BAD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)')
                 return $acl
+            }
+            function Get-NetFirewallRule {
+                param($Name,$PolicyStore,$ErrorAction)
+                return [pscustomobject]@{Name=$Name;Group='Unblock Discord Automatic'}
+            }
+            function Get-NetFirewallApplicationFilter {
+                param([Parameter(ValueFromPipeline=$true)]$InputObject)
+                process {
+                    $path=if($script:case -eq 'wrong-firewall'){'C:\OtherApp\ProxiFyre.exe'}else{Join-Path $script:root 'engines\proxifyre\ProxiFyre.exe'}
+                    [pscustomobject]@{Program=$path}
+                }
+            }
+            function Remove-NetFirewallRule {
+                param([Parameter(ValueFromPipeline=$true)]$InputObject)
+                process {
+                    if ($InputObject.Name -notin @('UnblockDiscord.Automatic.ProxiFyre.TCP','UnblockDiscord.Automatic.ProxiFyre.UDP')) { throw 'Unrelated firewall rule selected.' }
+                    $script:actions.Add('remove-rule-'+$InputObject.Name)
+                }
             }
             function Test-Path {
                 param($LiteralPath)
@@ -87,13 +105,14 @@ try {
                     $operation=[scriptblock]::Create($script:source)
                     if ($script:case -eq 'whatif') { & $operation -WhatIf } else { & $operation }
                 } catch { $failed=$true }
-                if ($script:case -in @('wrong-service','orphan-unmarked','junction')) {
+                if ($script:case -in @('wrong-service','orphan-unmarked','junction','wrong-firewall')) {
                     if (!$failed -or $script:actions.Count) { throw 'Unowned installation was not rejected before mutation.' }
                 } elseif ($script:case -eq 'whatif') {
                     if ($failed -or $script:actions.Count) { throw 'WhatIf performed a mutation.' }
                 } else {
                     if ($failed -or !$script:actions.Contains('remove-install-directory')) { throw 'Owned files were not selected for cleanup.' }
                     if (!$script:actions.Contains('kill-owned-process')) { throw 'Installed process cleanup was not exercised.' }
+                    if (@($script:actions | Where-Object {$_ -like 'remove-rule-*'}).Count -ne 2) { throw 'Owned firewall rules were not removed.' }
                     if ($script:case -eq 'normal' -and !$script:actions.Contains('delete-service')) { throw 'Owned service was not selected for removal.' }
                     if ($script:case -eq 'orphan-marked' -and $script:actions.Contains('delete-service')) { throw 'Unrelated service was touched during orphan cleanup.' }
                 }

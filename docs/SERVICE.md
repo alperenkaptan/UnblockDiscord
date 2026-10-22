@@ -1,19 +1,19 @@
 # Automatic Windows service
 
-Publishing now produces two executables in the same folder:
+Publishing separates the two usage modes:
 
-- `UnblockDiscord.exe`: the existing manual Start/Stop tray app.
-- `UnblockDiscord.Service.exe`: the optional automatic Windows service, with no UI.
+- `Manual\UnblockDiscord.exe`: manual Start/Stop tray app.
+- `Automatic-Service\UnblockDiscord.Service.exe`: automatic Windows service, with install/remove/check BATs beside it.
 
-Both reuse the same engines and published runtime DLLs. The service does not load WinForms. Use one mode at a time. The service and manual app use a machine-wide ownership semaphore and reject already-running bypass engines.
+Each mode folder includes its own runtime DLLs and engines and can be copied independently. Use one mode at a time. The service does not load WinForms; both modes enforce machine-wide bypass ownership.
 
 ## Install for automatic boot startup
 
-An actual Windows service needs one administrator installation step. It cannot safely run as LocalSystem from a user-writable portable folder. The installer copies the published folder to `%ProgramFiles%\UnblockDiscord`, protects it so only Administrators/SYSTEM can modify it, records the intended user's Discord folder, and registers automatic startup plus crash recovery. It leaves the portable copy usable separately.
+An actual Windows service needs one administrator installation step. It cannot safely run as LocalSystem from a user-writable portable folder. The installer copies the published folder to `%ProgramFiles%\UnblockDiscord`, protects it so only Administrators/SYSTEM can modify it, records the intended user's Discord folder, and registers automatic startup plus crash recovery. It also creates two uniquely named TCP/UDP inbound firewall rules for the installed ProxiFyre EXE, matching upstream installer requirements. These rules are program-specific and removed by our uninstaller. It leaves the portable copy usable separately.
 
 Close manual Unblock Discord and other bypass tools. The easiest installation is to double-click **Install-Automatic-Service.bat** in the extracted published folder and accept the administrator prompt. It runs the installer, which starts the service through Windows, then shows a status report that closes after 10 seconds or any key (including Esc). Keep the complete folder together; the BAT uses the scripts in `tools`. It preserves your original Discord folder if UAC asks for a different administrator account.
 
-For a command-line installation, from **64-bit Windows PowerShell 5.1, Run as Administrator**, inside the published folder:
+For a command-line installation, from **64-bit Windows PowerShell 5.1, Run as Administrator**, inside the `Automatic-Service` folder:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Install-Service.ps1
@@ -65,8 +65,12 @@ Or run the uninstaller directly as Administrator:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Uninstall-Service.ps1
 ```
 
-Uninstall preserves your extracted ZIP/portable downloads, historical Application event-log entries, Discord, other services, and the pre-existing Windows Packet Filter / Visual C++ runtime. It removes only the `UnblockDiscord` service and our verified installed directory; it never uninstalls ProxiFyreService, ndisrd or other shared services. If ownership cannot be established or a junction/symlink is present, it refuses file deletion and reports the reason. Older installs without an ownership marker can be removed while their original service registration still identifies the folder; new installs also support cleanup of marked leftover folders after service registration is already gone. No system proxy, DNS, hosts, firewall or Discord file changes need reversing.
+Uninstall preserves your extracted ZIP/portable downloads, historical Application event-log entries, Discord, other services, and the pre-existing Windows Packet Filter / Visual C++ runtime. It removes only the `UnblockDiscord` service and our verified installed directory; it never uninstalls ProxiFyreService, ndisrd or other shared services. If ownership cannot be established or a junction/symlink is present, it refuses file deletion and reports the reason. Older installs without an ownership marker can be removed while their original service registration still identifies the folder; new installs also support cleanup of marked leftover folders after service registration is already gone. Our uninstaller removes only its two `UnblockDiscord.Automatic.ProxiFyre.TCP/UDP` firewall rules. System proxy, DNS, hosts and Discord files remain unchanged.
 
 Read service state transitions and errors in **Event Viewer → Windows Logs → Application → Source: UnblockDiscord**. A Windows service's Running state means its watcher is running, not necessarily that a bypass strategy succeeded. For an interactive diagnostic run from an installed/configured folder, stop the Windows service first and run `UnblockDiscord.Service.exe --console` as Administrator.
 
 To update, stop the service and run the installer from a newly extracted publish folder. It verifies the existing registered path/permissions before replacing files.
+
+## Status check
+
+Double-click `Check-Automatic-System.bat` in `Automatic-Service`. It requests administrator access for complete process information, shows the service/startup state, installed files, engine process counts, both owned firewall rules and recent service events, then waits for Enter. A Running service means the watcher is alive; it is not by itself proof of successful Discord traffic routing.

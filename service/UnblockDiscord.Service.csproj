@@ -19,4 +19,10 @@
     <Compile Include="..\DiscordRelay.cs" Link="Shared\DiscordRelay.cs" />
     <Compile Include="..\DiscordTraffic.cs" Link="Shared\DiscordTraffic.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\engines\**\*" Link="engines\%(RecursiveDir)%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\Install-Automatic-Service.bat;..\Remove-Automatic-Service.bat;..\Check-Automatic-System.bat" Link="%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\tools\Install-Service.ps1;..\tools\Install-Service-Launcher.ps1;..\tools\Uninstall-Service.ps1;..\tools\Remove-Service-Launcher.ps1;..\tools\Check-Automatic-System.ps1" Link="tools\%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\docs\SERVICE.md" Link="README.md" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
