@@ -7,4 +7,5 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="..\UnblockDiscord.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="..\service\AutomaticBypass.cs" Link="AutomaticBypass.cs" /><Compile Include="..\service\DiscordProcessWatcher.cs" Link="DiscordProcessWatcher.cs" /><PackageReference Include="System.Management" Version="10.0.12" /></ItemGroup>
 </Project>

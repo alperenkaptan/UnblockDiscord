@@ -20,10 +20,15 @@
     <PackageTags>discord;turkey;turkiye;dpi-bypass;byedpi;proxifyre;windows;winforms</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="tests\**" />
+    <Compile Remove="tests\**;service\**" />
     <Content Include="engines\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <InternalsVisibleTo Include="UnblockDiscord.Tests" />
     <EmbeddedResource Include="assets\unblock-discord.ico" LogicalName="UnblockDiscord.AppIcon" />
     <None Update="README.md;docs\TECHNICAL.md" CopyToPublishDirectory="PreserveNewest" />
+    <None Update="docs\SERVICE.md;tools\Install-Service.ps1;tools\Uninstall-Service.ps1" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <Target Name="PublishAutomaticService" AfterTargets="Publish">
+    <MSBuild Projects="service\UnblockDiscord.Service.csproj" Targets="Restore;Publish" RemoveProperties="PublishProfile;PublishProfileFullPath"
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishSingleFile=false;PublishTrimmed=false;PublishDir=$([System.IO.Path]::GetFullPath('$(PublishDir)', '$(MSBuildProjectDirectory)'));DebugType=none;DebugSymbols=false" />
+  </Target>
 </Project>

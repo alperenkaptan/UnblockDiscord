@@ -11,11 +11,22 @@ internal sealed class BypassController : IDisposable
     private Process? dpi;
     private Process? router;
     private DiscordRelay? relay;
+    private Semaphore? ownership;
+    private bool ownsEngines;
+    private int stopping;
+    private readonly string discordFolder;
+    private readonly string engineDirectory;
     internal event Action? EngineExited;
     internal bool IsRunning => router is { HasExited: false } && dpi is { HasExited: false };
 
     internal static string DiscordFolder => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Discord") + Path.DirectorySeparatorChar;
+
+    internal BypassController(string? discordFolder = null, string? engineDirectory = null)
+    {
+        this.discordFolder = Path.GetFullPath(discordFolder ?? DiscordFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        this.engineDirectory = engineDirectory ?? Path.Combine(AppContext.BaseDirectory, "engines");
+    }
 
     internal static string Configuration(string folder, int port) => JsonSerializer.Serialize(new
     {
@@ -31,7 +42,7 @@ internal sealed class BypassController : IDisposable
     internal async Task StartAsync(Action<string> progress, CancellationToken token)
     {
         if (children != null) throw new InvalidOperationException("The bypass is already active.");
-        if (!File.Exists(Path.Combine(DiscordFolder, "Update.exe")))
+        if (!File.Exists(Path.Combine(discordFolder, "Update.exe")))
             throw new IOException("Discord was not found in its default installation folder.");
         foreach (var name in new[] { "ProxiFyre", "ciadpi", "goodbyedpi", "winws", "winws2" })
         {
@@ -40,14 +51,18 @@ internal sealed class BypassController : IDisposable
             foreach (var process in processes) process.Dispose();
             if (found) throw new InvalidOperationException($"Close the existing {name} bypass before starting.");
         }
-        var basePath = Path.Combine(AppContext.BaseDirectory, "engines");
+        var basePath = engineDirectory;
         var dpiPath = Path.Combine(basePath, "byedpi", "ciadpi.exe");
         var routerPath = Path.Combine(basePath, "proxifyre", "ProxiFyre.exe");
         if (!File.Exists(dpiPath) || !File.Exists(routerPath))
             throw new IOException("Bypass engines are missing. Restore the engines folder beside this app.");
-        children = new ChildProcesses();
         try
         {
+            ownership = new Semaphore(1, 1, "Global\\UnblockDiscord.Bypass");
+            ownsEngines = ownership.WaitOne(0);
+            if (!ownsEngines) throw new IOException("Another Unblock Discord instance owns the bypass. Stop the automatic service before using manual mode.");
+            Volatile.Write(ref stopping, 0);
+            children = new ChildProcesses();
             // Test actual unauthenticated endpoints on this connection rather than
             // assuming a strategy works for every Turk Telekom installation.
             string[][] profiles =
@@ -87,7 +102,7 @@ internal sealed class BypassController : IDisposable
 
             progress("Starting...");
             await File.WriteAllTextAsync(Path.Combine(Path.GetDirectoryName(routerPath)!, "app-config.json"),
-                Configuration(DiscordFolder, relay.Port), token);
+                Configuration(discordFolder, relay.Port), token);
             var ready = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             router = children.Start(routerPath, [], line =>
             {
@@ -98,9 +113,9 @@ internal sealed class BypassController : IDisposable
             router.Exited += (_, _) =>
             {
                 ready.TrySetException(new IOException("ProxiFyre stopped. Verify the Windows Packet Filter driver is installed and running."));
-                EngineExited?.Invoke();
+                if (Volatile.Read(ref stopping) == 0) EngineExited?.Invoke();
             };
-            dpi!.Exited += (_, _) => EngineExited?.Invoke();
+            dpi!.Exited += (_, _) => { if (Volatile.Read(ref stopping) == 0) EngineExited?.Invoke(); };
             if (router.HasExited) throw new IOException("ProxiFyre could not start. Check the Windows Packet Filter driver.");
             await ready.Task.WaitAsync(TimeSpan.FromSeconds(12), token);
             if (!IsRunning) throw new IOException("A bypass engine stopped during startup.");
@@ -163,6 +178,7 @@ internal sealed class BypassController : IDisposable
 
     public void Dispose()
     {
+        Volatile.Write(ref stopping, 1);
         children?.Dispose();
         children = null;
         relay?.Dispose();
@@ -171,5 +187,9 @@ internal sealed class BypassController : IDisposable
         router = null;
         Kill(dpi);
         dpi = null;
+        if (ownsEngines) ownership!.Release();
+        ownsEngines = false;
+        ownership?.Dispose();
+        ownership = null;
     }
 }

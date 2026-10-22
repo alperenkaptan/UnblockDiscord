@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="UnblockDiscord.csproj" />
+  <Project Path="service/UnblockDiscord.Service.csproj" />
 </Solution>

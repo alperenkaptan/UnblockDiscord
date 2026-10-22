@@ -72,6 +72,8 @@ try
     Check(child.HasExited, "Engine job children terminate when parent is force-killed");
 }
 finally { File.Delete(pidFile); }
+await AutomaticServiceTests.RunAsync();
+if (args.Contains("--watch-events")) await AutomaticServiceTests.WatchEventsAsync();
 if (!args.Contains("--network")) return;
 
 using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
