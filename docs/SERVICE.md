@@ -57,13 +57,15 @@ Stop-Service UnblockDiscord
 Set-Service UnblockDiscord -StartupType Disabled
 ```
 
-To unregister it:
+For full removal, double-click **Remove-Automatic-Service.bat** and accept the administrator prompt. It stops and unregisters our service, removes automatic startup/recovery settings, closes installed copies of our processes, deletes the verified `%ProgramFiles%\UnblockDiscord` directory (including configuration and engines), and unregisters our Application event-log source. Its report closes after 10 seconds or any key, including Esc. The launcher hands off the removal code in memory, so it can also remove its own installed copy.
+
+Or run the uninstaller directly as Administrator:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Uninstall-Service.ps1
 ```
 
-Uninstall leaves installed files and historical Application event logs in place, and preserves the pre-existing packet-filter driver. No system proxy, DNS, hosts, firewall or Discord file changes need reversing.
+Uninstall preserves your extracted ZIP/portable downloads, historical Application event-log entries, Discord, other services, and the pre-existing Windows Packet Filter / Visual C++ runtime. It removes only the `UnblockDiscord` service and our verified installed directory; it never uninstalls ProxiFyreService, ndisrd or other shared services. If ownership cannot be established or a junction/symlink is present, it refuses file deletion and reports the reason. Older installs without an ownership marker can be removed while their original service registration still identifies the folder; new installs also support cleanup of marked leftover folders after service registration is already gone. No system proxy, DNS, hosts, firewall or Discord file changes need reversing.
 
 Read service state transitions and errors in **Event Viewer → Windows Logs → Application → Source: UnblockDiscord**. A Windows service's Running state means its watcher is running, not necessarily that a bypass strategy succeeded. For an interactive diagnostic run from an installed/configured folder, stop the Windows service first and run `UnblockDiscord.Service.exe --console` as Administrator.
 

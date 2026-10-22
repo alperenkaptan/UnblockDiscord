@@ -63,6 +63,7 @@ Get-ChildItem -LiteralPath $source -Recurse -Force | ForEach-Object {
 }
 Copy-Item -Path (Join-Path $source '*') -Destination $destination -Recurse -Force
 @{ DiscordFolder = $DiscordFolder } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $destination 'service.json') -Encoding UTF8
+@{ Product = 'UnblockDiscord.AutomaticService'; InstallDirectory = $destination } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $destination '.unblockdiscord-install.json') -Encoding UTF8
 & icacls.exe $destination /setowner '*S-1-5-32-544' /T /Q | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Could not protect ownership of service files.' }
 Assert-Protected (Get-Item -LiteralPath $destination)

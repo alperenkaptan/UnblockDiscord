@@ -25,7 +25,7 @@
     <InternalsVisibleTo Include="UnblockDiscord.Tests" />
     <EmbeddedResource Include="assets\unblock-discord.ico" LogicalName="UnblockDiscord.AppIcon" />
     <None Update="README.md;docs\TECHNICAL.md" CopyToPublishDirectory="PreserveNewest" />
-    <None Update="Install-Automatic-Service.bat;tools\Install-Service-Launcher.ps1;docs\SERVICE.md;tools\Install-Service.ps1;tools\Uninstall-Service.ps1" CopyToPublishDirectory="PreserveNewest" />
+    <None Update="Remove-Automatic-Service.bat;tools\Remove-Service-Launcher.ps1;Install-Automatic-Service.bat;tools\Install-Service-Launcher.ps1;docs\SERVICE.md;tools\Install-Service.ps1;tools\Uninstall-Service.ps1" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="PublishAutomaticService" AfterTargets="Publish">
     <MSBuild Projects="service\UnblockDiscord.Service.csproj" Targets="Restore;Publish" RemoveProperties="PublishProfile;PublishProfileFullPath"

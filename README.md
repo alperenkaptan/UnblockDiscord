@@ -86,6 +86,8 @@ This is experimental. NXDOMAIN responses, hidden TLS hostnames (ECH), direct IP 
 
 Publishing also includes `UnblockDiscord.Service.exe`. It can start at boot, wait for Discord process events, activate the bypass while Discord is open, and stop the engines after a 10-second update handover window. It uses the same runtime and engines as the manual app.
 
+Double-click `Install-Automatic-Service.bat` in the extracted publish folder to request administrator approval and install/start the service. Double-click `Remove-Automatic-Service.bat` for full removal of our service, installed configuration/files, and event-log source. Each launcher shows a short report with a 10-second countdown.
+
 A real Windows service requires an Administrator install step into a protected Program Files folder. Run `tools\Install-Service.ps1` from the published folder using 64-bit Windows PowerShell 5.1 as Administrator. It targets the installing user's Discord folder; use `-DiscordFolder` if elevating as another account. Do not run the manual app's bypass at the same time.
 
 Yayımlanan klasörde `UnblockDiscord.Service.exe` de bulunur. Windows açılışında başlar, Discord işlem olaylarını bekler ve yalnızca Discord açıkken bypass motorlarını çalıştırır. Gerçek bir Windows hizmeti için yönetici olarak kurulum gerekir. Kurulum, durdurma ve kaldırma adımları: [Windows service guide](docs/SERVICE.md).
