@@ -7,10 +7,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets\unblock-discord.ico</ApplicationIcon>
+    <Title>Unblock Discord</Title>
+    <Product>Unblock Discord</Product>
+    <Description>Discord-only DPI bypass for Windows in Turkey, using ByeDPI and ProxiFyre with per-connection DNS correction.</Description>
+    <Authors>alperenkaptan</Authors>
+    <Version>0.1.0</Version>
+    <RepositoryUrl>https://github.com/alperenkaptan/UnblockDiscord</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/alperenkaptan/UnblockDiscord</PackageProjectUrl>
+    <PackageTags>discord;turkey;turkiye;dpi-bypass;byedpi;proxifyre;windows;winforms</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests\**" />
     <Content Include="engines\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <InternalsVisibleTo Include="UnblockDiscord.Tests" />
+    <EmbeddedResource Include="assets\unblock-discord.ico" LogicalName="UnblockDiscord.AppIcon" />
   </ItemGroup>
 </Project>

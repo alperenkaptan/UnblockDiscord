@@ -1,0 +1,45 @@
+name: Connection problem / Bağlantı sorunu
+description: Report startup, updates, messaging, or voice problems.
+title: "[Connection] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: App version / Uygulama sürümü
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 x64"
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Internet provider and connection / İnternet sağlayıcısı ve bağlantı
+      placeholder: "Türk Telekom fiber, Ethernet"
+    validations:
+      required: true
+  - type: dropdown
+    id: affected
+    attributes:
+      label: What fails? / Hangi özellik çalışmıyor?
+      options:
+        - Start / engine startup
+        - Discord startup or updates
+        - Login or messaging
+        - Voice / RTC Connecting
+        - Video or screen sharing
+        - Stop / cleanup
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Steps and error message / Adımlar ve hata mesajı
+      description: Include what happened and what you expected. Remove account tokens, email addresses, and private conversations from logs or screenshots.
+    validations:
+      required: true

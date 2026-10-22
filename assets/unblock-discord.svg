@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>Unblock Discord</title>
+  <desc>An open mint padlock with a white speech bubble on a dark blue tile.</desc>
+  <rect width="256" height="256" rx="56" fill="#14243b"/>
+  <path d="M88 126V88C88 38 168 38 168 88V96" fill="none" stroke="#66e3bd" stroke-width="18" stroke-linecap="round"/>
+  <rect x="64" y="120" width="128" height="88" rx="20" fill="#fff"/>
+  <path d="M80 196V228L116 200" fill="#fff"/>
+  <circle cx="128" cy="154" r="12" fill="#14243b"/>
+  <path d="M122 158H134L138 184H118Z" fill="#14243b"/>
+</svg>

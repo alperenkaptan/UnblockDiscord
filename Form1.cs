@@ -10,6 +10,10 @@ public partial class Form1 : Form
     public Form1()
     {
         InitializeComponent();
+        using (var iconStream = typeof(Form1).Assembly.GetManifestResourceStream("UnblockDiscord.AppIcon")!)
+        using (var appIcon = new Icon(iconStream))
+            Icon = (Icon)appIcon.Clone();
+        trayIcon.Icon = Icon;
         bypass.EngineExited += () =>
         {
             if (!closing && IsHandleCreated)
