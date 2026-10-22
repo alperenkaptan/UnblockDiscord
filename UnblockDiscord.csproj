@@ -9,6 +9,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>assets\unblock-discord.ico</ApplicationIcon>
     <Title>Unblock Discord</Title>
+    <AssemblyTitle>Unblock Discord</AssemblyTitle>
     <Product>Unblock Discord</Product>
     <Description>Discord-only DPI bypass for Windows in Turkey, using ByeDPI and ProxiFyre with per-connection DNS correction.</Description>
     <Authors>alperenkaptan</Authors>
@@ -23,5 +24,6 @@
     <Content Include="engines\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <InternalsVisibleTo Include="UnblockDiscord.Tests" />
     <EmbeddedResource Include="assets\unblock-discord.ico" LogicalName="UnblockDiscord.AppIcon" />
+    <None Update="README.md;docs\TECHNICAL.md" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
